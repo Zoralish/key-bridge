@@ -1,22 +1,18 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace KeyBridge;
 
 public class KeyBridgeConfig
 {
-    public const string Executable = ".exe";
-    public const string Database = ".kdbx";
-    public const string KeyFile = ".keyx";
+    public const string ExecutableExtension = ".exe";
+    public const string DatabaseExtension = ".kdbx";
+    public const string KeyFileExtension = ".keyx";
     public required string KeePassPath { get; init; }
     public required string KPScriptPath { get; init; }
     public required string LocalDatabasePath { get; init; }
     public required string CloudDatabsePath { get; init; }
     public required string KeyFilePath { get; init; }
     public required string EncryptedPassword { get; init; }
-
-    [JsonIgnore]
-    public string? DecryptedPassword { set; get; }
 }
 
 public class KeyBridgeConfigManager
@@ -61,24 +57,26 @@ public class KeyBridgeConfigManager
     {
         var missingFiles = new List<string>();
 
-        if (!IsValidEntry(config.KeePassPath, KeyBridgeConfig.Executable))
-            missingFiles.Add($"KeePass.exe: {config.KeePassPath}");
+        if (!IsValidEntry(config.KeePassPath, KeyBridgeConfig.ExecutableExtension))
+            missingFiles.Add($"KeePass executable: {config.KeePassPath}");
 
-        if (!IsValidEntry(config.KPScriptPath, KeyBridgeConfig.Executable))
-            missingFiles.Add($"KPScript.exe: {config.KPScriptPath}");
+        if (!IsValidEntry(config.KPScriptPath, KeyBridgeConfig.ExecutableExtension))
+            missingFiles.Add($"KPScript executable: {config.KPScriptPath}");
 
-        if (!IsValidEntry(config.LocalDatabasePath, KeyBridgeConfig.Database))
-            missingFiles.Add($"Database1.kbdx: {config.LocalDatabasePath}");
+        if (!IsValidEntry(config.LocalDatabasePath, KeyBridgeConfig.DatabaseExtension))
+            missingFiles.Add($"Local database: {config.LocalDatabasePath}");
 
-        if (!IsValidEntry(config.CloudDatabsePath, KeyBridgeConfig.Database))
-            missingFiles.Add($"Database2.kbdx: {config.CloudDatabsePath}");
+        if (!IsValidEntry(config.CloudDatabsePath, KeyBridgeConfig.DatabaseExtension))
+            missingFiles.Add($"Cloud database: {config.CloudDatabsePath}");
 
-        if (!IsValidEntry(config.KeyFilePath, KeyBridgeConfig.KeyFile))
-            missingFiles.Add($"Key.keyx: {config.KeyFilePath}");
+        if (!IsValidEntry(config.KeyFilePath, KeyBridgeConfig.KeyFileExtension))
+            missingFiles.Add($"Key file: {config.KeyFilePath}");
 
         if (missingFiles.Count > 0)
             throw new InvalidDataException(
-                $"The following required files could not be found:{Environment.NewLine}"
+                "The following required files could not be found:"
+                    + Environment.NewLine
+                    + Environment.NewLine
                     + string.Join(Environment.NewLine, missingFiles)
             );
 
@@ -91,7 +89,7 @@ public class KeyBridgeConfigManager
                 StringComparison.OrdinalIgnoreCase
             )
         )
-            conflictingPaths.Add($"KeePass.exe & KPScript.exe: {config.KeePassPath}");
+            conflictingPaths.Add($"KeePass & KPScript executables: {config.KeePassPath}");
         if (
             string.Equals(
                 config.LocalDatabasePath,
@@ -105,6 +103,7 @@ public class KeyBridgeConfigManager
         {
             throw new InvalidDataException(
                 "The following paths collide:"
+                    + Environment.NewLine
                     + Environment.NewLine
                     + string.Join(Environment.NewLine, conflictingPaths)
             );

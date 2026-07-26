@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-
 namespace KeyBridge;
 
 public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellationToken)
@@ -8,9 +5,10 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
     private readonly KeyBridgeConfig _config = config;
     private readonly CancellationToken _cancellationToken = cancellationToken;
 
-    [DoesNotReturn]
-    public async Task OpenLocalDatabase()
+    public async Task OpenLocalDatabaseAsync()
     {
+        await RequestHydrationAsync(_config.LocalDatabasePath);
+
         string[] syncArguments =
         [
             "-pw-stdin",
@@ -18,21 +16,24 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
             $"-keyfile:{_config.KeyFilePath}",
         ];
 
-        ReadOnlyMemory<char> readOnlyDecryptedPassword = _config.DecryptedPassword.AsMemory();
+        ReadOnlyMemory<char> readOnlyDecryptedPassword = MasterPasswordEncryption
+            .Decrypt(_config.EncryptedPassword)
+            .AsMemory();
 
         await ProcessRunner.RunExternalProcessAsync(
             _config.KeePassPath,
             syncArguments,
-            awaitResults: false,
+            awaitExit: false,
             _cancellationToken,
             readOnlyDecryptedPassword
         );
-
-        Environment.Exit(0);
     }
 
-    public async Task<(int exitCode, string message)?> SynchronizeDatabasesAsync()
+    public async Task SynchronizeDatabasesAsync()
     {
+        await RequestHydrationAsync(_config.LocalDatabasePath);
+        await RequestHydrationAsync(_config.CloudDatabsePath);
+
         string[] syncArguments =
         [
             "-c:Sync",
@@ -43,20 +44,33 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
 
         ReadOnlyMemory<char>[] writerArguments =
         [
-            _config.DecryptedPassword.AsMemory(),
+            MasterPasswordEncryption.Decrypt(_config.EncryptedPassword).AsMemory(),
             _config.KeyFilePath.AsMemory(),
             ReadOnlyMemory<char>.Empty,
         ];
 
-        var result =
-            await ProcessRunner.RunExternalProcessAsync(
-                _config.KPScriptPath,
-                syncArguments,
-                awaitResults: true,
-                _cancellationToken,
-                writerArguments
-            ) ?? throw new UnreachableException();
+        await ProcessRunner.RunExternalProcessAsync(
+            _config.KPScriptPath,
+            syncArguments,
+            awaitExit: true,
+            _cancellationToken,
+            writerArguments
+        );
+    }
 
-        return result;
+    private async Task RequestHydrationAsync(string path)
+    {
+        using var stream = new FileStream(
+            path,
+            new FileStreamOptions
+            {
+                Mode = FileMode.Open,
+                Access = FileAccess.Read,
+                Share = FileShare.ReadWrite,
+                Options = FileOptions.Asynchronous,
+            }
+        );
+
+        await stream.CopyToAsync(Stream.Null, _cancellationToken);
     }
 }

@@ -5,10 +5,10 @@ namespace KeyBridge;
 
 public static class ProcessRunner
 {
-    public static async Task<(int exitCode, string message)?> RunExternalProcessAsync(
+    public static async Task RunExternalProcessAsync(
         string processName,
         string[] syncArguments,
-        bool awaitResults,
+        bool awaitExit,
         CancellationToken cancellationToken,
         params ReadOnlyMemory<char>[] writerArguments
     )
@@ -17,7 +17,7 @@ public static class ProcessRunner
         {
             FileName = processName,
             RedirectStandardInput = true,
-            RedirectStandardOutput = true,
+            RedirectStandardOutput = awaitExit,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
@@ -34,12 +34,14 @@ public static class ProcessRunner
         catch (Win32Exception ex)
         {
             throw new InvalidOperationException(
-                $"OS failed to execute process. Details: {ex.Message}",
+                $"OS failed to execute process. Details:{Environment.NewLine}{ex.Message}",
                 ex
             );
         }
 
-        Task<string> outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        Task<string>? outputTask = null;
+        if (awaitExit)
+            outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
 
         try
         {
@@ -53,18 +55,17 @@ public static class ProcessRunner
         catch (IOException)
         {
             if (!process.HasExited)
-                throw;
+                process.Kill(entireProcessTree: true);
+            throw;
         }
         catch (OperationCanceledException)
         {
             process.Kill(entireProcessTree: true);
-            throw new TimeoutException(
-                $"The {processName} process timed out while sending credentials."
-            );
+            throw;
         }
 
-        if (!awaitResults)
-            return null;
+        if (!awaitExit)
+            return;
 
         try
         {
@@ -73,11 +74,18 @@ public static class ProcessRunner
         catch (OperationCanceledException)
         {
             process.Kill(entireProcessTree: true);
-            throw new TimeoutException($"The {processName} execution was cancelled.");
+            throw;
         }
 
-        string output = (await outputTask).Trim();
+        if (process.ExitCode != 0)
+        {
+            if (outputTask is null)
+                throw new UnreachableException();
 
-        return (process.ExitCode, output);
+            string output = (await outputTask).Trim();
+            throw new InvalidOperationException(output);
+        }
+
+        return;
     }
 }

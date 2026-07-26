@@ -16,14 +16,20 @@ public static class MasterPasswordEncryption
             )
             .CreateProtector("KeyBridge.PasswordManager", "MasterPassword", "v1");
     }
+
+    public static string Decrypt(string encryptedPassword)
+    {
+        return Protector.Unprotect(encryptedPassword);
+    }
 }
 
-public static class DataPurge
+public static class AppDataReset
 {
-    public static void PurgeEverything()
+    public static void Reset()
     {
         if (File.Exists(AppPaths.ConfigPath))
             File.Delete(AppPaths.ConfigPath);
+
         if (Directory.Exists(AppPaths.DataProtectionKeyRingPath))
             Directory.Delete(AppPaths.DataProtectionKeyRingPath, recursive: true);
     }
