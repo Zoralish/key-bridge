@@ -27,11 +27,10 @@ public static class ConsoleUI
     {
         public Choice(ActionCommand value, string display)
         {
-            Value = value;
-
             string displayColor = (value is ActionCommand.Unknown) ? "#5C6777" : GeneralColorHex;
-
             Display = $"[{displayColor}]{display}[/]";
+
+            Value = value;
         }
 
         public ActionCommand Value { get; }

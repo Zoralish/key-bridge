@@ -162,14 +162,14 @@ static CancellationTokenSource CreateConsoleCancellationSource()
 
 static void ResetAppData()
 {
-    string question = "[red]Delete[/] the existing configuration file?";
-    string hint = "[[y/N]]";
+    string question =
+        $"[{ConsoleUI.GeneralColorHex}][{ConsoleUI.errorColorHex}]Delete[/] the existing configuration file?[/]";
+    string hint = $"[{ConsoleUI.SelectionColorHex}]" + "[[y/N]]" + "[/]";
 
     var prompt = new TextPrompt<string>($"{question} {hint}").DefaultValue("N").HideDefaultValue();
-
     var response = AnsiConsole.Prompt(prompt);
-    bool confirmed = char.ToUpperInvariant(response.Trim()[0]) == 'Y';
 
+    bool confirmed = char.ToUpperInvariant(response.Trim()[0]) == 'Y';
     if (!confirmed)
         ConsoleUI.Shutdown(0);
 
