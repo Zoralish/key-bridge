@@ -5,14 +5,14 @@ namespace KeyBridge;
 
 public static class ConsoleUI
 {
-    public static readonly string infoTag = "[#7390B0]" + "INFO".PadRight(7) + "[/]";
-    public static readonly string errorTag = "[#C15E67]" + "ERROR".PadRight(7) + "[/]";
-    public static readonly string successTag = "[#6CA285]" + "SUCCESS".PadRight(7) + "[/]";
+    public static readonly string InfoTag = "[#7390B0]" + "INFO".PadRight(7) + "[/]";
+    public static readonly string ErrorTag = "[#C15E67]" + "ERROR".PadRight(7) + "[/]";
+    public static readonly string SuccessTag = "[#6CA285]" + "SUCCESS".PadRight(7) + "[/]";
 
     public static readonly string GeneralColorHex = "#D2D8E1";
     public static readonly string HighlightColorHex = "#7E9CB9";
     public static readonly string SelectionColorHex = "#84BCA3";
-    public static readonly string errorColorHex = "#D98A94";
+    public static readonly string ErrorColorHex = "#D98A94";
 
     public enum ActionCommand
     {
@@ -23,7 +23,7 @@ public static class ConsoleUI
         Terminate,
     }
 
-    record Choice
+    private record Choice
     {
         public Choice(ActionCommand value, string display)
         {
@@ -92,7 +92,7 @@ public static class ConsoleUI
     public static void DisplayError(string message, Exception ex)
     {
         Title();
-        AnsiConsole.MarkupLine($"{errorTag} [{GeneralColorHex}]{message.EscapeMarkup()}[/]");
+        AnsiConsole.MarkupLine($"{ErrorTag} [{GeneralColorHex}]{message.EscapeMarkup()}[/]");
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold #D98A94]" + Markup.Remove(ex.Message) + "[/]");

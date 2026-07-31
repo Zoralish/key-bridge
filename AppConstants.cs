@@ -10,4 +10,8 @@ public static class AppPaths
         AppContext.BaseDirectory,
         "DataProtectionKeys"
     );
+    public static readonly string BackupFolderPath = Path.Combine(
+        AppContext.BaseDirectory,
+        "sync-backup"
+    );
 }

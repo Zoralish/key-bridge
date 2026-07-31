@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace KeyBridge;
 
-public static class MasterPasswordEncryption
+public static class EncryptionService
 {
     public static IDataProtector Protector { get; }
 
-    static MasterPasswordEncryption()
+    static EncryptionService()
     {
         Directory.CreateDirectory(AppPaths.DataProtectionKeyRingPath);
         Protector = DataProtectionProvider
@@ -20,17 +20,5 @@ public static class MasterPasswordEncryption
     public static string Decrypt(string encryptedPassword)
     {
         return Protector.Unprotect(encryptedPassword);
-    }
-}
-
-public static class AppDataReset
-{
-    public static void Reset()
-    {
-        if (File.Exists(AppPaths.ConfigPath))
-            File.Delete(AppPaths.ConfigPath);
-
-        if (Directory.Exists(AppPaths.DataProtectionKeyRingPath))
-            Directory.Delete(AppPaths.DataProtectionKeyRingPath, recursive: true);
     }
 }

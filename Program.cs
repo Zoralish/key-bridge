@@ -44,14 +44,10 @@ try
         case ConsoleUI.ActionCommand.SyncDBs:
             await ConsoleUI.RunWithSpinnerAsync(
                 "Synchronizing...",
-                async () =>
-                {
-                    await Task.Delay(10_000, cts.Token);
-                    await Runner.SynchronizeDatabasesAsync();
-                }
+                Runner.SynchronizeDatabasesAsync
             );
 
-            ConsoleUI.WriteLogMessage(ConsoleUI.successTag, "Databases synchronized successfully");
+            ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Databases synchronized successfully");
             ConsoleUI.Shutdown(0);
             break;
         case ConsoleUI.ActionCommand.Reset:
@@ -70,6 +66,7 @@ catch (Exception ex)
                 or IOException
                 or InvalidOperationException
                 or CryptographicException
+                or InvalidDataException
     )
 {
     ConsoleUI.DisplayError("Action could not performed", ex);
@@ -78,8 +75,8 @@ catch (Exception ex)
 
 static async Task SetupNewConfigFile(string message)
 {
-    ConsoleUI.WriteLogMessage(ConsoleUI.errorTag, message);
-    ConsoleUI.WriteLogMessage(ConsoleUI.infoTag, "Configuration initialization");
+    ConsoleUI.WriteLogMessage(ConsoleUI.ErrorTag, message);
+    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "Configuration initialization");
     Console.WriteLine();
 
     string kpPath = PromptForValidPath("KeePass.exe", KeyBridgeConfig.ExecutableExtension);
@@ -91,9 +88,7 @@ static async Task SetupNewConfigFile(string message)
     var prompt = new TextPrompt<string>(
         $"[{ConsoleUI.GeneralColorHex}]Enter your master password [{ConsoleUI.SelectionColorHex}]\u00bb[/][/]"
     ).Secret();
-    string encryptedPassword = MasterPasswordEncryption.Protector.Protect(
-        AnsiConsole.Prompt(prompt)
-    );
+    string encryptedPassword = EncryptionService.Protector.Protect(AnsiConsole.Prompt(prompt));
 
     KeyBridgeConfig configData = new()
     {
@@ -117,7 +112,7 @@ static async Task SetupNewConfigFile(string message)
     }
 
     AnsiConsole.WriteLine();
-    ConsoleUI.WriteLogMessage(ConsoleUI.successTag, "Configuration file created");
+    ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Configuration file created");
     ConsoleUI.Shutdown(0);
 
     static string PromptForValidPath(string displayName, string expectedExtension)
@@ -163,7 +158,7 @@ static CancellationTokenSource CreateConsoleCancellationSource()
 static void ResetAppData()
 {
     string question =
-        $"[{ConsoleUI.GeneralColorHex}][{ConsoleUI.errorColorHex}]Delete[/] the existing configuration file?[/]";
+        $"[{ConsoleUI.GeneralColorHex}][{ConsoleUI.ErrorColorHex}]Delete[/] all configuration data?[/]";
     string hint = $"[{ConsoleUI.SelectionColorHex}]" + "[[y/N]]" + "[/]";
 
     var prompt = new TextPrompt<string>($"{question} {hint}").DefaultValue("N").HideDefaultValue();
@@ -175,7 +170,7 @@ static void ResetAppData()
 
     try
     {
-        AppDataReset.Reset();
+        DataDeletionServices.Delete();
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
     {
@@ -184,6 +179,6 @@ static void ResetAppData()
     }
 
     AnsiConsole.WriteLine();
-    ConsoleUI.WriteLogMessage(ConsoleUI.infoTag, "Configuration file has been deleted");
+    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "Configuration file has been deleted");
     ConsoleUI.Shutdown(0);
 }

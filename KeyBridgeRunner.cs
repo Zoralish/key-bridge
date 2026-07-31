@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Hosting;
+
 namespace KeyBridge;
 
 public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellationToken)
@@ -16,7 +18,7 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
             $"-keyfile:{_config.KeyFilePath}",
         ];
 
-        ReadOnlyMemory<char> readOnlyDecryptedPassword = MasterPasswordEncryption
+        ReadOnlyMemory<char> readOnlyDecryptedPassword = EncryptionService
             .Decrypt(_config.EncryptedPassword)
             .AsMemory();
 
@@ -34,6 +36,8 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
         await RequestHydrationAsync(_config.LocalDatabasePath);
         await RequestHydrationAsync(_config.CloudDatabsePath);
 
+        DataBackupServices.Backup(_config.LocalDatabasePath, _config.CloudDatabsePath);
+
         string[] syncArguments =
         [
             "-c:Sync",
@@ -44,7 +48,7 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
 
         ReadOnlyMemory<char>[] writerArguments =
         [
-            MasterPasswordEncryption.Decrypt(_config.EncryptedPassword).AsMemory(),
+            EncryptionService.Decrypt(_config.EncryptedPassword).AsMemory(),
             _config.KeyFilePath.AsMemory(),
             ReadOnlyMemory<char>.Empty,
         ];
