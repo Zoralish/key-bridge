@@ -1,24 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
 
     <PublishSingleFile>true</PublishSingleFile>
-    <!-- <SelfContained>true</SelfContained> -->
-    <!-- <DebugType>none</DebugType> -->
+    <SelfContained>true</SelfContained>
+    <DebugType>none</DebugType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <!-- <PublishTrimmed>true</PublishTrimmed> -->
-    <!-- <PubilshAot>true</PubilshAot> -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishAot>true</PublishAot>
 
-    <!-- <EnableTrimAnalyzer>true</EnableTrimAnalyzer> -->
-    <!-- <EnableAOTAnalyzer>true</EnableAOTAnalyzer> -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableAOTAnalyzer>true</EnableAOTAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.Extensions" Version="10.0.10" />
     <PackageReference Include="Spectre.Console" Version="0.57.2" />
-    <!-- <PackageReference Include="System.Text.Json" Version="10.0.10" /> -->
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KeyBridge;
 
@@ -25,7 +26,7 @@ public class KeyBridgeConfigManager
         string json = File.ReadAllText(AppPaths.ConfigPath);
 
         var config =
-            JsonSerializer.Deserialize<KeyBridgeConfig>(json)
+            JsonSerializer.Deserialize(json, KeyBridgeJsonContext.Default.KeyBridgeConfig)
             ?? throw new JsonException("Configuration file could not be processed");
 
         VerifyConfig(config);
@@ -37,7 +38,7 @@ public class KeyBridgeConfigManager
     {
         string json = JsonSerializer.Serialize(
             configData,
-            new JsonSerializerOptions { WriteIndented = true }
+            KeyBridgeJsonContext.IndentedContext.KeyBridgeConfig
         );
         await File.WriteAllTextAsync(AppPaths.ConfigPath, json);
     }
@@ -109,4 +110,11 @@ public class KeyBridgeConfigManager
             );
         }
     }
+}
+
+[JsonSerializable(typeof(KeyBridgeConfig))]
+internal partial class KeyBridgeJsonContext : JsonSerializerContext
+{
+    public static KeyBridgeJsonContext IndentedContext { get; } =
+        new(new JsonSerializerOptions { WriteIndented = true });
 }

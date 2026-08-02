@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-
 namespace KeyBridge;
 
 public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellationToken)
