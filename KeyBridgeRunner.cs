@@ -32,16 +32,16 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
     public async Task SynchronizeDatabasesAsync()
     {
         await RequestHydrationAsync(_config.LocalDatabasePath);
-        await RequestHydrationAsync(_config.CloudDatabsePath);
+        await RequestHydrationAsync(_config.CloudDatabasePath);
 
-        DataBackupServices.Backup(_config.LocalDatabasePath, _config.CloudDatabsePath);
+        DataBackupServices.Backup(_config.LocalDatabasePath, _config.CloudDatabasePath);
 
         string[] syncArguments =
         [
             "-c:Sync",
             "-keyprompt",
             _config.LocalDatabasePath,
-            $"-File:{_config.CloudDatabsePath}",
+            $"-File:{_config.CloudDatabasePath}",
         ];
 
         ReadOnlyMemory<char>[] writerArguments =

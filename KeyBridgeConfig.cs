@@ -11,7 +11,7 @@ public class KeyBridgeConfig
     public required string KeePassPath { get; init; }
     public required string KPScriptPath { get; init; }
     public required string LocalDatabasePath { get; init; }
-    public required string CloudDatabsePath { get; init; }
+    public required string CloudDatabasePath { get; init; }
     public required string KeyFilePath { get; init; }
     public required string EncryptedPassword { get; init; }
 }
@@ -21,13 +21,13 @@ public class KeyBridgeConfigManager
     public static KeyBridgeConfig Load()
     {
         if (!File.Exists(AppPaths.ConfigPath))
-            throw new FileNotFoundException("Configuration file not found");
+            throw new FileNotFoundException("Configuration file not found.");
 
         string json = File.ReadAllText(AppPaths.ConfigPath);
 
         var config =
             JsonSerializer.Deserialize(json, KeyBridgeJsonContext.Default.KeyBridgeConfig)
-            ?? throw new JsonException("Configuration file could not be processed");
+            ?? throw new JsonException("Configuration file could not be processed.");
 
         VerifyConfig(config);
 
@@ -67,8 +67,8 @@ public class KeyBridgeConfigManager
         if (!IsValidEntry(config.LocalDatabasePath, KeyBridgeConfig.DatabaseExtension))
             missingFiles.Add($"Local database: {config.LocalDatabasePath}");
 
-        if (!IsValidEntry(config.CloudDatabsePath, KeyBridgeConfig.DatabaseExtension))
-            missingFiles.Add($"Cloud database: {config.CloudDatabsePath}");
+        if (!IsValidEntry(config.CloudDatabasePath, KeyBridgeConfig.DatabaseExtension))
+            missingFiles.Add($"Cloud database: {config.CloudDatabasePath}");
 
         if (!IsValidEntry(config.KeyFilePath, KeyBridgeConfig.KeyFileExtension))
             missingFiles.Add($"Key file: {config.KeyFilePath}");
@@ -94,7 +94,7 @@ public class KeyBridgeConfigManager
         if (
             string.Equals(
                 config.LocalDatabasePath,
-                config.CloudDatabsePath,
+                config.CloudDatabasePath,
                 StringComparison.OrdinalIgnoreCase
             )
         )
@@ -103,7 +103,7 @@ public class KeyBridgeConfigManager
         if (conflictingPaths.Count > 0)
         {
             throw new InvalidDataException(
-                "The following paths collide:"
+                "The following paths conflict:"
                     + Environment.NewLine
                     + Environment.NewLine
                     + string.Join(Environment.NewLine, conflictingPaths)

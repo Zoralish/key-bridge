@@ -41,7 +41,7 @@ public static class ConsoleUI
     {
         AnsiConsole.Clear();
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[bold #B83973]KeyBridge - CLI Utililty[/]");
+        AnsiConsole.MarkupLine("[bold #B83973]KeyBridge - CLI Utility[/]");
         AnsiConsole.WriteLine();
     }
 
@@ -54,14 +54,14 @@ public static class ConsoleUI
     {
         var action = AnsiConsole.Prompt(
             new SelectionPrompt<Choice>()
-                .Title($"[{GeneralColorHex}]Select your [{HighlightColorHex}]action[/][/]")
+                .Title($"[{GeneralColorHex}]Select an [{HighlightColorHex}]action[/][/]")
                 .UseConverter(c => c.Display)
                 .HighlightStyle(Style.Parse(SelectionColorHex))
                 .AddChoiceGroup(
                     new Choice(default, "Databases"),
                     [
                         new Choice(ActionCommand.OpenLocalDB, "Open local database"),
-                        new Choice(ActionCommand.SyncDBs, "Synchozize databases"),
+                        new Choice(ActionCommand.SyncDBs, "Synchronize databases"),
                     ]
                 )
                 .AddChoiceGroup(
@@ -95,7 +95,7 @@ public static class ConsoleUI
         AnsiConsole.MarkupLine($"{ErrorTag} [{GeneralColorHex}]{message.EscapeMarkup()}[/]");
 
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[bold #D98A94]" + Markup.Remove(ex.Message) + "[/]");
+        AnsiConsole.MarkupLine("[bold #D98A94]" + ex.Message.EscapeMarkup() + "[/]");
         AnsiConsole.WriteLine();
     }
 

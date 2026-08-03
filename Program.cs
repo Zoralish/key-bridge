@@ -22,7 +22,7 @@ catch (FileNotFoundException ex)
 }
 catch (Exception ex) when (ex is JsonException or InvalidDataException)
 {
-    ConsoleUI.DisplayError("Configuration file could not be processed", ex);
+    ConsoleUI.DisplayError("Configuration file could not be processed.", ex);
     ResetAppData();
     return;
 }
@@ -47,7 +47,7 @@ try
                 Runner.SynchronizeDatabasesAsync
             );
 
-            ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Databases synchronized successfully");
+            ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Databases synchronized successfully.");
             ConsoleUI.Shutdown(0);
             break;
         case ConsoleUI.ActionCommand.Reset:
@@ -64,26 +64,27 @@ catch (Exception ex)
     when (ex
             is OperationCanceledException
                 or IOException
+                or UnauthorizedAccessException
                 or InvalidOperationException
                 or CryptographicException
                 or InvalidDataException
     )
 {
-    ConsoleUI.DisplayError("Action could not performed", ex);
+    ConsoleUI.DisplayError("This action could not be performed.", ex);
     ConsoleUI.Shutdown(1);
 }
 
 static async Task SetupNewConfigFile(string message)
 {
     ConsoleUI.WriteLogMessage(ConsoleUI.ErrorTag, message);
-    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "Configuration initialization");
+    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "Initializing configuration");
     Console.WriteLine();
 
     string kpPath = PromptForValidPath("KeePass.exe", KeyBridgeConfig.ExecutableExtension);
     string kpScript = PromptForValidPath("KPScript.exe", KeyBridgeConfig.ExecutableExtension);
     string localDb = PromptForValidPath("Local database", KeyBridgeConfig.DatabaseExtension);
     string cloudDb = PromptForValidPath("Cloud database", KeyBridgeConfig.DatabaseExtension);
-    string keyFile = PromptForValidPath("Key file", KeyBridgeConfig.KeyFileExtension);
+    string keyFile = PromptForValidPath("Key", KeyBridgeConfig.KeyFileExtension);
 
     var prompt = new TextPrompt<string>(
         $"[{ConsoleUI.GeneralColorHex}]Enter your master password [{ConsoleUI.SelectionColorHex}]\u00bb[/][/]"
@@ -95,7 +96,7 @@ static async Task SetupNewConfigFile(string message)
         KeePassPath = kpPath,
         KPScriptPath = kpScript,
         LocalDatabasePath = localDb,
-        CloudDatabsePath = cloudDb,
+        CloudDatabasePath = cloudDb,
         KeyFilePath = keyFile,
         EncryptedPassword = encryptedPassword,
     };
@@ -106,19 +107,19 @@ static async Task SetupNewConfigFile(string message)
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
     {
-        ConsoleUI.DisplayError("Failed to create config file!", ex);
+        ConsoleUI.DisplayError("Failed to create configuration file.", ex);
         ConsoleUI.Shutdown(1);
         return;
     }
 
     AnsiConsole.WriteLine();
-    ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Configuration file created");
+    ConsoleUI.WriteLogMessage(ConsoleUI.SuccessTag, "Configuration file created.");
     ConsoleUI.Shutdown(0);
 
     static string PromptForValidPath(string displayName, string expectedExtension)
     {
         var prompt = new TextPrompt<string>(
-            $"[{ConsoleUI.GeneralColorHex}]{displayName} location path [grey](Drag & drop file here)[/] [{ConsoleUI.SelectionColorHex}]\u00bb[/][/]"
+            $"[{ConsoleUI.GeneralColorHex}]{displayName} file path [grey](drag and drop file here)[/] [{ConsoleUI.SelectionColorHex}]\u00bb[/][/]"
         );
         string rawInput = AnsiConsole.Prompt(prompt);
         var span = rawInput.AsSpan().Trim();
@@ -174,11 +175,11 @@ static void ResetAppData()
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
     {
-        ConsoleUI.DisplayError("Failed to delete existing configuration", ex);
+        ConsoleUI.DisplayError("Failed to delete existing configuration.", ex);
         ConsoleUI.Shutdown(1);
     }
 
     AnsiConsole.WriteLine();
-    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "Configuration file has been deleted");
+    ConsoleUI.WriteLogMessage(ConsoleUI.InfoTag, "All configuration data has been deleted.");
     ConsoleUI.Shutdown(0);
 }

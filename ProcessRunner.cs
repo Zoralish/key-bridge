@@ -34,7 +34,7 @@ public static class ProcessRunner
         catch (Win32Exception ex)
         {
             throw new InvalidOperationException(
-                $"OS failed to execute process. Details:{Environment.NewLine}{ex.Message}",
+                $"OS failed to execute the process. Details:{Environment.NewLine}{ex.Message}",
                 ex
             );
         }
