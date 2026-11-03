@@ -5,6 +5,8 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
     private readonly KeyBridgeConfig _config = config;
     private readonly CancellationToken _cancellationToken = cancellationToken;
 
+    private readonly EncryptionService _encryptionService = new();
+
     public async Task OpenLocalDatabaseAsync()
     {
         await RequestHydrationAsync(_config.LocalDatabasePath);
@@ -16,7 +18,7 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
             $"-keyfile:{_config.KeyFilePath}",
         ];
 
-        ReadOnlyMemory<char> readOnlyDecryptedPassword = EncryptionService
+        ReadOnlyMemory<char> readOnlyDecryptedPassword = _encryptionService
             .Decrypt(_config.EncryptedPassword)
             .AsMemory();
 
@@ -46,7 +48,7 @@ public class KeyBridgeRunner(KeyBridgeConfig config, CancellationToken cancellat
 
         ReadOnlyMemory<char>[] writerArguments =
         [
-            EncryptionService.Decrypt(_config.EncryptedPassword).AsMemory(),
+            _encryptionService.Decrypt(_config.EncryptedPassword).AsMemory(),
             _config.KeyFilePath.AsMemory(),
             ReadOnlyMemory<char>.Empty,
         ];

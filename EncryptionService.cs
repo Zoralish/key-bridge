@@ -2,14 +2,14 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace KeyBridge;
 
-public static class EncryptionService
+public sealed class EncryptionService
 {
-    public static IDataProtector Protector { get; }
+    private readonly IDataProtector _protector;
 
-    static EncryptionService()
+    public EncryptionService()
     {
         Directory.CreateDirectory(AppPaths.DataProtectionKeyRingPath);
-        Protector = DataProtectionProvider
+        _protector = DataProtectionProvider
             .Create(
                 new DirectoryInfo(AppPaths.DataProtectionKeyRingPath),
                 builder => builder.ProtectKeysWithDpapi()
@@ -17,8 +17,13 @@ public static class EncryptionService
             .CreateProtector("KeyBridge.PasswordManager", "MasterPassword", "v1");
     }
 
-    public static string Decrypt(string encryptedPassword)
+    public string Encrypt(string password)
     {
-        return Protector.Unprotect(encryptedPassword);
+        return _protector.Protect(password);
+    }
+
+    public string Decrypt(string encryptedPassword)
+    {
+        return _protector.Unprotect(encryptedPassword);
     }
 }

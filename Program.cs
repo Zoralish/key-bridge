@@ -89,20 +89,21 @@ static async Task SetupNewConfigFile(string message)
     var prompt = new TextPrompt<string>(
         $"[{ConsoleUI.GeneralColorHex}]Enter your master password [{ConsoleUI.SelectionColorHex}]\u00bb[/][/]"
     ).Secret();
-    string encryptedPassword = EncryptionService.Protector.Protect(AnsiConsole.Prompt(prompt));
-
-    KeyBridgeConfig configData = new()
-    {
-        KeePassPath = kpPath,
-        KPScriptPath = kpScript,
-        LocalDatabasePath = localDb,
-        CloudDatabasePath = cloudDb,
-        KeyFilePath = keyFile,
-        EncryptedPassword = encryptedPassword,
-    };
 
     try
     {
+        string encryptedPassword = new EncryptionService().Encrypt(AnsiConsole.Prompt(prompt));
+
+        KeyBridgeConfig configData = new()
+        {
+            KeePassPath = kpPath,
+            KPScriptPath = kpScript,
+            LocalDatabasePath = localDb,
+            CloudDatabasePath = cloudDb,
+            KeyFilePath = keyFile,
+            EncryptedPassword = encryptedPassword,
+        };
+
         await KeyBridgeConfigManager.SetupNew(configData);
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
